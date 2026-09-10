@@ -1,0 +1,7 @@
+{
+  "clientConfigs": {
+    "your_client_id": {
+      "tenantName": "your_tenant_id"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+platform :ios, '13.0'
+use_frameworks!
+inhibit_all_warnings!
+
+# Keep the two apps in one workspace at the repo root.
+workspace '../UPITpapTestApp.xcworkspace'
+project 'UPITpapTestApp-Pods.xcodeproj'
+
+# Pin the version Juspay gave you. CocoaPods uses a 4-part scheme here
+# (e.g. '2.2.9.2'); the matching SPM tag is '2.2.9'.
+hyper_sdk_version = '2.2.9'
+
+target 'UPITpapTestApp-Pods' do
+  # Keep all three pods on the same version (per the UPI TPAP "adding-plugin" doc).
+  pod 'HyperSDK', hyper_sdk_version
+  pod 'HyperUPI', hyper_sdk_version   # UPI TPAP plugin
+  pod 'HyperQR',  hyper_sdk_version   # QR plugin
+  # Note (per doc): HyperQR must be removed for the "direct" plugin integration mode.
+end
+
+post_install do |installer|
+  # Assets Plugin: fuse the OTA assets into the framework. Reads MerchantConfig.json
+  # from this directory. This is the CocoaPods equivalent of the SPM scheme pre-action.
+  # Second arg = clean_assets: set true to force a full re-download of all assets.
+  fuse_path = './Pods/HyperSDK/Fuse.rb'
+  clean_assets = false
+  if File.exist?(fuse_path)
+    system('ruby', fuse_path, clean_assets.to_s)
+  else
+    puts "[Podfile] WARNING: #{fuse_path} not found — HyperSDK assets not fused."
+  end
+
+  installer.pods_project.targets.each do |t|
+    t.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    end
+  end
+end

@@ -1,0 +1,44 @@
+name: UPITpapTestApp-Pods
+
+options:
+  bundleIdPrefix: io.juspay.tpaptest
+  deploymentTarget:
+    iOS: "13.0"
+  createIntermediateGroups: true
+
+targets:
+  UPITpapTestApp-Pods:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: ../Shared/Sources
+        name: Shared
+      - path: Resources
+        buildPhase: resources
+        excludes:
+          - "Info.plist"   # consumed via INFOPLIST_FILE, not copied as a resource
+      # Local, git-ignored secrets — bundled so TPAPConfig can read it at runtime.
+      # `optional` so generation/build still work on a fresh clone without it.
+      - path: ../Config/Secrets.json
+        buildPhase: resources
+        optional: true
+    dependencies:
+      # NPCI Common Library (CL 1.8 UAT) — dynamic xcframework, vendored in-repo.
+      # (HyperSDK/HyperUPI/HyperQR come from the Podfile, not here.)
+      - framework: ../ThirdParty/CommonLibrary.xcframework
+        embed: true
+        codeSign: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.juspay.tpaptest.pods
+        PRODUCT_NAME: UPITpapTestApp-Pods
+        INFOPLIST_FILE: Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+    # No SPM package here. The HyperSDK dependency + Assets Plugin come from the
+    # Podfile in this directory (`pod install` re-runs Fuse.rb via post_install).

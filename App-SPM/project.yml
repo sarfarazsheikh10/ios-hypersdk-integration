@@ -1,0 +1,79 @@
+name: UPITpapTestApp-SPM
+
+options:
+  bundleIdPrefix: io.juspay.tpaptest
+  deploymentTarget:
+    iOS: "13.0"
+  createIntermediateGroups: true
+
+packages:
+  # Pin all three to the same tag Juspay gave you. `2.2.9` is the latest stable
+  # tag on each repo as of writing. You can also use `branch: main` to track latest.
+  HyperSDK:
+    url: https://github.com/juspay/hypersdk-ios.git
+    exactVersion: "2.2.9"
+  # UPI TPAP plugin — https://github.com/juspay/hyperupi-ios
+  HyperUPI:
+    url: https://github.com/juspay/hyperupi-ios.git
+    exactVersion: "2.2.9"
+  # QR plugin — https://github.com/juspay/hyperqr-ios
+  HyperQR:
+    url: https://github.com/juspay/hyperqr-ios.git
+    exactVersion: "2.2.9"
+
+targets:
+  UPITpapTestApp-SPM:
+    type: application
+    platform: iOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: ../Shared/Sources
+        name: Shared
+      - path: Resources
+        buildPhase: resources
+        excludes:
+          - "Info.plist"   # consumed via INFOPLIST_FILE, not copied as a resource
+      # Local, git-ignored secrets — bundled so TPAPConfig can read it at runtime.
+      # `optional` so generation/build still work on a fresh clone without it.
+      - path: ../Config/Secrets.json
+        buildPhase: resources
+        optional: true
+    dependencies:
+      - package: HyperSDK
+        product: HyperSDK
+      - package: HyperUPI
+        product: HyperUPI
+      - package: HyperQR
+        product: HyperQR
+      # NPCI Common Library (CL 1.8 UAT) — dynamic xcframework, vendored in-repo.
+      - framework: ../ThirdParty/CommonLibrary.xcframework
+        embed: true
+        codeSign: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.juspay.tpaptest.spm
+        PRODUCT_NAME: UPITpapTestApp-SPM
+        INFOPLIST_FILE: Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: "NO"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+    scheme:
+      # Juspay Assets Plugin — downloads/fuses the OTA assets at build time.
+      # Equivalent of "Edit Scheme… → Build → Pre-actions → New Run Script".
+      # Script is verbatim from https://github.com/juspay/hypersdk-ios README.
+      preActions:
+        - name: "Juspay Assets Download"
+          settingsTarget: UPITpapTestApp-SPM
+          script: |
+            PACKAGE_DIR="${BUILD_DIR%Build/*}SourcePackages/artifacts/hypersdk-ios/HyperSDK"
+            XCFRAMEWORK_DIR="${PACKAGE_DIR}/HyperSDK.xcframework"
+            FUSE_SCRIPT="${PACKAGE_DIR}/Fuse.rb"
+            FUSE_MARKER="${XCFRAMEWORK_DIR}/.fuse_completed"
+            VALIDATION_SCRIPT="${PACKAGE_DIR}/ValidateHyperSDK.rb"
+
+            [ ! -f "$FUSE_MARKER" ] || [ "${ACTION}" == "clean" ] && { cd "${PROJECT_DIR}"; echo "Running Fuse.rb script..."; ruby "$FUSE_SCRIPT"; }
+
+            ruby "$VALIDATION_SCRIPT" && touch "$FUSE_MARKER" || exit 1

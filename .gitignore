@@ -1,0 +1,36 @@
+# --- Xcode ---
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+
+# --- Generated Xcode projects (run `make gen` to recreate from project.yml) ---
+App-SPM/UPITpapTestApp-SPM.xcodeproj/
+App-CocoaPods/UPITpapTestApp-Pods.xcodeproj/
+
+# --- CocoaPods ---
+App-CocoaPods/Pods/
+App-CocoaPods/Podfile.lock
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+Package.resolved
+
+# --- Juspay Assets Plugin output (downloaded/fused at build time) ---
+Fuse.rb
+ValidateHyperSDK.rb
+*.zip
+assets/
+
+# --- macOS ---
+.DS_Store
+
+# Vendored proprietary binaries — supply locally (see ThirdParty/README.md)
+ThirdParty/*.xcframework/
+
+# Local secrets — real values live here, threaded into TPAPConfig at runtime
+Config/Secrets.json
