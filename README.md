@@ -1,8 +1,8 @@
-# UPI TPAP Test App (iOS)
+# iOS HyperSDK Integration
 
-A minimal iOS test harness for Juspay's **Hyper SDK / UPI TPAP SDK**, wired up
-**both ways** — Swift Package Manager *and* CocoaPods — from a single shared
-codebase.
+A minimal iOS test harness for Juspay's **Hyper SDK** (UPI TPAP / UPI Plugin –
+Direct PSP), wired up **both ways** — Swift Package Manager *and* CocoaPods —
+from a single shared codebase.
 
 Reference docs:
 - UPI TPAP SDK — iOS integration architecture: <https://juspay.io/in/docs/upi-tpap-sdk/ios/overview/integration-architecture>
@@ -18,7 +18,7 @@ Plugin hooks would collide. So there are **two app targets**, one per dependency
 manager, and they **share every line of app code**:
 
 ```
-upi-tpap-testapp/
+ios-hypersdk-integration/
 ├── UPITpapTestApp.xcworkspace/   ← open this; contains both app projects (+ Pods)
 ├── Shared/Sources/               ← ALL app + SDK-integration code (compiled by BOTH apps)
 │   ├── AppDelegate.swift  SceneDelegate.swift
@@ -62,7 +62,7 @@ from the `project.yml` specs, so they're git-ignored. Regenerate any time with
 brew install xcodegen          # if not already installed
 sudo gem install cocoapods     # if not already installed
 
-cd upi-tpap-testapp
+cd ios-hypersdk-integration
 make setup                     # = make gen + make pods
 open UPITpapTestApp.xcworkspace
 ```
